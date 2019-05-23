@@ -1,32 +1,54 @@
 <?php
+/*
+Plugin Name: Museu Victor Meirelles
+Description: Adiciona a lista de obras relacionadas aos itens das outras coleções
+Author: Media Lab / UFG
+Version: 1.0
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-3.0.html
+*/
+require_once ('theme-options.php');
 
-
-// Estilos
-function museuindio_enqueue_styles() {
-    $parent_style = 'tainacan-interface';
-    wp_enqueue_style( $parent_style, get_template_directory_uri() . '/style.css' );
-}
-add_action( 'wp_enqueue_scripts', 'museuindio_enqueue_styles', 99 );
+// Estilos (se usar como tema)
+// function museuindio_enqueue_styles() {
+//     $parent_style = 'tainacan-interface';
+//     wp_enqueue_style( $parent_style, get_template_directory_uri() . '/style.css' );
+// }
+// add_action( 'wp_enqueue_scripts', 'museuindio_enqueue_styles', 99 );
 
 add_action('tainacan-interface-single-item-after-metadata', function() {
 	
 	global $TAINACAN_BASE_URL;
 	
+	$main_collection_id = get_theme_option('main_collection_id');
+	
+	if (!is_numeric($main_collection_id)) {
+		return;
+	}
+	
 	$meta_repo = \Tainacan\Repositories\Metadata::get_instance();
 	$current_item = tainacan_get_item();
 	$col_id = $current_item->get_collection_id();
 	
+	if ($col_id == $main_collection_id) {
+		return;
+	}
 	
 	$r = $meta_repo->fetch_one([
 		'metadata_type' => 'Tainacan\Metadata_Types\Relationship',
+		'collection_id' => $main_collection_id,
 		'meta_query' => [
 			[
 				'key' => 'metadata_type_options',
-				'value' => tainacan_get_item()->get_collection_id(),
+				'value' => $col_id,
 				'compare' => 'LIKE'
 			]
 		]
 	], 'OBJECT');
+	
+	if (!$r) {
+		return;
+	}
 	
 	$meta_id = $r->get_id();
 	$meta_col_id = $r->get_collection_id();
@@ -36,6 +58,23 @@ add_action('tainacan-interface-single-item-after-metadata', function() {
 	$search_url = admin_url('admin.php?page=tainacan_admin') . '#/collections/'.$meta_col_id.'/items?' . $meta_query_url;
 	
 	$link = trailingslashit( get_permalink( (int) $meta_col_id) ) . '#/?' . $meta_query_url;
+	
+	// checa se tem algum item 
+	$itens_repo = \Tainacan\Repositories\Items::get_instance();
+	
+	$have_items = $itens_repo->fetch([
+		'posts_per_page' => 1,
+		'meta_query' => [
+			[
+				'key' => $meta_id,
+				'value' => $current_item->get_id()
+			]
+		]
+	]);
+	
+	if ( ! $have_items->found_posts) {
+		return;
+	}
 	
 	?>	
 	
