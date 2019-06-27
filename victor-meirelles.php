@@ -3,7 +3,7 @@
 Plugin Name: Museu Victor Meirelles
 Description: Adiciona a lista de obras relacionadas aos itens das outras coleções
 Author: Media Lab / UFG
-Version: 1.0
+Version: 1.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 */
