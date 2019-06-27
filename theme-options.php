@@ -19,8 +19,8 @@ function mvm_options_menu() {
     $menu_title = 'Opções';
     
     /* Top level menu */
-    add_submenu_page('mvm_options', $page_title, $menu_title, 'customize', 'mvm_options', 'mvm_options_page_callback_function');
-    add_menu_page($topLevelMenuLabel, $topLevelMenuLabel, 'customize', 'mvm_options', 'mvm_options_page_callback_function');
+    add_submenu_page('mvm_options', $page_title, $menu_title, 'edit_others_posts', 'mvm_options', 'mvm_options_page_callback_function');
+    add_menu_page($topLevelMenuLabel, $topLevelMenuLabel, 'edit_others_posts', 'mvm_options', 'mvm_options_page_callback_function');
 
     
 }
